@@ -38,9 +38,7 @@ def scraptweets(search_words, date_since, numTweets, numRuns):
     # We cannot make large API call in one go. Hence, let's try T times
 
     # Define a pandas dataframe to store the date:
-    db_tweets = pd.DataFrame(columns = ['username', 'acctdesc', 'location', 'following',
-                                        'followers', 'totaltweets', 'usercreatedts', 'tweetcreatedts',
-                                        'retweetcount', 'text', 'hashtags']
+    db_tweets = pd.DataFrame(columns = ['username', 'text', 'hashtags']
                                 )
     program_start = time.time()
     for i in range(0, numRuns):
@@ -71,22 +69,21 @@ def scraptweets(search_words, date_since, numTweets, numRuns):
         for tweet in tweet_list:
             # Pull the values
             username = tweet.user.screen_name
-            acctdesc = tweet.user.description
-            location = tweet.user.location
-            following = tweet.user.friends_count
-            followers = tweet.user.followers_count
-            totaltweets = tweet.user.statuses_count
-            usercreatedts = tweet.user.created_at
-            tweetcreatedts = tweet.created_at
-            retweetcount = tweet.retweet_count
+            # acctdesc = tweet.user.description
+            # location = tweet.user.location
+            # following = tweet.user.friends_count
+            # followers = tweet.user.followers_count
+            # totaltweets = tweet.user.statuses_count
+            # usercreatedts = tweet.user.created_at
+            # tweetcreatedts = tweet.created_at
+            # retweetcount = tweet.retweet_count
             hashtags = tweet.entities['hashtags']
             try:
                 text = tweet.retweeted_status.full_text
             except AttributeError:# Not a Retweet
                 text = tweet.full_text
             # Add the 11 variables to the empty list - ith_tweet:
-            ith_tweet = [username, acctdesc, location, following, followers, totaltweets,
-                         usercreatedts, tweetcreatedts, retweetcount, text, hashtags]
+            ith_tweet = [username, text, hashtags]
             # Append to dataframe - db_tweets
             db_tweets.loc[len(db_tweets)] = ith_tweet
             # increase counter - noTweets
@@ -120,8 +117,8 @@ def scraptweets(search_words, date_since, numTweets, numRuns):
 
 # Execution params
 # Initialise these variables:
-search_words = "#ICUBed OR #OxygenCylinders OR #PlasmaDonor OR #PlasmaRequirement"
-date_since = "2021-04-29"
+search_words = 'verified Hyderabad (bed OR beds OR icu OR oxygen OR ventilator OR ventilators OR test OR tests OR testing OR plasma)'
+date_since = "2021-04-30"
 numTweets = 2500
 numRuns = 1
 # Call the function scraptweets
