@@ -98,7 +98,7 @@ def scraptweets(search_words, date_since, numTweets, numRuns):
 
         if i != (numRuns - 1):
             # Sleep 15 mins between scrapes
-            time.sleep(600)
+            time.sleep(900)
 
     # Once all runs have completed, save them to a single csv file:
     from datetime import datetime
@@ -118,8 +118,8 @@ def scraptweets(search_words, date_since, numTweets, numRuns):
 # Execution params
 # Initialise these variables:
 search_words = 'verified Hyderabad (bed OR beds OR icu OR oxygen OR ventilator OR ventilators OR test OR tests OR testing OR plasma)'
-date_since = "2021-04-30"
+date_since = "2021-05-04"
 numTweets = 2500
-numRuns = 1
+numRuns = 4
 # Call the function scraptweets
 scraptweets(search_words, date_since, numTweets, numRuns)
