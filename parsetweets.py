@@ -12,8 +12,7 @@ import getopt
 import re
 import sys
 from collections import defaultdict
-import numpy as np
-import matplotlib.pyplot as plt
+import pandas as pd
 import sys
 import argparse
 from argparse import RawTextHelpFormatter
@@ -22,6 +21,7 @@ from os.path import abspath
 from os import listdir
 from os.path import isfile, join
 from numpy import arange
+from datetime import datetime as dt
 
 def findurls(str):
 	urls = re.findall('http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\(\), ]|(?:%[0-9a-fA-F][0-9a-fA-F]))+', str)
@@ -37,8 +37,8 @@ def findbloodgroup(str):
 	return(bloodgroup)
 
 def findContact(str):
-	contact = re.findall("[91]*\s*[0-9]{2}\s*[0-9]{4}\s*[0-9]{4}",str)
-	return(contact)
+	contacts = re.findall("[91]*\s*[0-9]{2}\s*[0-9]{4}\s*[0-9]{4}",str)
+	return list(map(lambda x: x.strip(), contacts))
 
 
 def findCity(str):
@@ -51,7 +51,7 @@ def findCity(str):
 
 
 
-def resourcereq(tweet):
+def resourcereq(user, tweet):
 	# This proc parses tweets from request hashtags and returns username,resource,contact,bloodtype,city,fulltweet
 	# Looking for plasma and oxygen
 	# if Plasma, additionally look for blood type 
@@ -63,7 +63,7 @@ def resourcereq(tweet):
 			req = "NEED"
 		else:
 			req = "UNKNOWN"
-		username = tweet.split(',')[0]
+		username = user
 		if "OXYGEN" in tweet.upper():
 			resource = "oxygen"
 		elif "PLASMA" in tweet.upper():
@@ -76,7 +76,7 @@ def resourcereq(tweet):
 		contact = findContact(tweet)
 		cities = findCity(tweet)
 		# print("username = {}, resource = {}, Purpose = {},  bloodgroup = {}, contact = {}, cities = {} ".format(username,resource,req,bloodgroup,contact,cities,tweet))
-		return(username,resource,req,bloodgroup,contact,cities,tweet)
+		return [username,resource,req,bloodgroup,contact,cities,tweet]
 		
 		
 
@@ -98,16 +98,26 @@ def main():
 	description='Code extracts information relevant to COVID 19 from tweets')
 	parser.add_argument('--csv',  help='csv', required=True, dest='csv')
 	input_args = vars(parser.parse_args())
- 	with open(input_args['csv']) as csvfile:
-		line = csvfile.readline()
-		while(line):
-			line = line.strip()
-			# Testing resource request function
-			resourcereq(line)
-			line = csvfile.readline()
-			
 
-  
+	# Define a pandas dataframe to store the date:
+	processed_tweets = pd.DataFrame(columns = ['username','resource','req','bloodgroup','contact','cities','tweet'])
+	raw_tweets = pd.read_csv(input_args['csv'])
+	raw_tweets = raw_tweets.drop_duplicates('text')
+
+	for index, row in raw_tweets.iterrows():
+		# Testing resource request function
+		processed_tweets.loc[len(processed_tweets)] = resourcereq(row['username'], row['text'])
+
+		# Put progress onto console
+		if (len(processed_tweets) % 100 == 0):
+			print(f"Processed {len(processed_tweets)} tweets thus far")
+	
+	# Obtain timestamp in a readable format
+	to_csv_timestamp = dt.today().strftime('%Y%m%d_%H%M%S')
+    # Define working path and filename
+	path = os.getcwd()
+	filename = path + '/data/' + to_csv_timestamp + '_parsed_deduped_data.csv'
+	processed_tweets.to_csv(filename, index = False)
 
 if __name__ == '__main__':
   main()

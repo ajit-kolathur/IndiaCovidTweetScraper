@@ -40,8 +40,8 @@ def scraptweets(search_words, date_since, numTweets, numRuns):
     # We cannot make large API call in one go. Hence, let's try T times
 
     # Define a pandas dataframe to store the date:
-    db_tweets = pd.DataFrame(columns = ['username', 'text', 'hashtags']
-                                )
+    db_tweets = pd.DataFrame(columns = ['username', 'text', 'hashtags'])
+    
     program_start = time.time()
     for i in range(0, numRuns):
         # We will time how long it takes to scrape tweets for each run:
