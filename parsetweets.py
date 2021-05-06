@@ -25,7 +25,7 @@ from datetime import datetime as dt
 
 def findurls(str):
 	urls = re.findall('http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\(\), ]|(?:%[0-9a-fA-F][0-9a-fA-F]))+', str)
-	return(urls)	
+	return list(map(lambda x: x.strip(), urls))	
 
 def findbloodgroup(str):
 	if re.search("AB\s*[+-]",str):
@@ -47,7 +47,7 @@ def findCity(str):
 	for city in cities:
 		if city.upper() in str.upper():
 			tweetcities.append(city)
-	return(tweetcities)
+	return list(map(lambda x: x.strip(), tweetcities))
 
 
 
@@ -75,8 +75,9 @@ def resourcereq(user, tweet_date, tweet):
 		bloodgroup = findbloodgroup(tweet)
 		contact = findContact(tweet)
 		cities = findCity(tweet)
+		urls = findurls(tweet)
 		# print("username = {}, resource = {}, Purpose = {},  bloodgroup = {}, contact = {}, cities = {} ".format(username,resource,req,bloodgroup,contact,cities,tweet))
-		return [username,tweet_date,resource,req,bloodgroup,contact,cities,tweet]
+		return [username,tweet_date,resource,req,bloodgroup,contact,urls,cities,tweet]
 		
 		
 
@@ -100,7 +101,7 @@ def main():
 	input_args = vars(parser.parse_args())
 
 	# Define a pandas dataframe to store the date:
-	processed_tweets = pd.DataFrame(columns = ['username', 'tweet_date', 'resource','req','bloodgroup','contact','cities','tweet'])
+	processed_tweets = pd.DataFrame(columns = ['username', 'tweet_date', 'resource','req','bloodgroup','contact', 'urls', 'cities','tweet'])
 	raw_tweets = pd.read_csv(input_args['csv'])
 	raw_tweets = raw_tweets.drop_duplicates('text')
 
