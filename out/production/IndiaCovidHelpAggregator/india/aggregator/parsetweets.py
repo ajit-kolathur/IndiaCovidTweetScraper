@@ -11,7 +11,8 @@ import getopt
 import re
 import sys
 from collections import defaultdict
-import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
 import sys
 import argparse
 from argparse import RawTextHelpFormatter
@@ -20,12 +21,11 @@ from os.path import abspath
 from os import listdir
 from os.path import isfile, join
 from numpy import arange
-from datetime import datetime as dt
 
 
 def findurls(str):
     urls = re.findall('http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\(\), ]|(?:%[0-9a-fA-F][0-9a-fA-F]))+', str)
-    return list(map(lambda x: x.strip(), urls))
+    return (urls)
 
 
 def findbloodgroup(str):
@@ -39,26 +39,20 @@ def findbloodgroup(str):
 
 
 def findContact(str):
-    contacts = re.findall("[91]*\s*[0-9]{2}\s*[0-9]{4}\s*[0-9]{4}",str)
-    if (len(contacts)) == 0:
-        contacts = re.findall("[91]*\s*[0-9]{5}\s*[0-9]{5}",str)
-    return list(map(lambda x: x.strip(), contacts))
+    contact = re.findall("[91]*\s*[0-9]{2}\s*[0-9]{4}\s*[0-9]{4}", str)
+    return (contact)
 
 
 def findCity(str):
-    cities = get_all_cities()
+    cities = ["Hyderabad", "Bangalore", "Mumbai", "Bombay", "Delhi", "Thane", "Nagpur", "Chennai", "Nashik"]
     tweetcities = []
     for city in cities:
         if city.upper() in str.upper():
             tweetcities.append(city)
-    return tweetcities
+    return (tweetcities)
 
 
-def get_all_cities():
-    return ["Hyderabad", "Bangalore", "Mumbai", "Bombay", "Delhi", "Thane", "Nagpur", "Chennai", "Nashik", "Waranagal"]
-
-
-def resourcereq(user, tweet_date, tweet, id):
+def resourcereq(tweet):
     # This proc parses tweets from request hashtags and returns username,resource,contact,bloodtype,city,fulltweet
     # Looking for plasma and oxygen
     # if Plasma, additionally look for blood type
@@ -70,7 +64,7 @@ def resourcereq(user, tweet_date, tweet, id):
             req = "NEED"
         else:
             req = "UNKNOWN"
-        username = user
+        username = tweet.split(',')[0]
         if "OXYGEN" in tweet.upper():
             resource = "oxygen"
         elif "PLASMA" in tweet.upper():
@@ -82,10 +76,8 @@ def resourcereq(user, tweet_date, tweet, id):
         bloodgroup = findbloodgroup(tweet)
         contact = findContact(tweet)
         cities = findCity(tweet)
-        urls = findurls(tweet)
-        tweet_url = "https://twitter.com/twitter/statuses/{}".format(id)
         # print("username = {}, resource = {}, Purpose = {},  bloodgroup = {}, contact = {}, cities = {} ".format(username,resource,req,bloodgroup,contact,cities,tweet))
-        return [username, tweet_date, resource, req, bloodgroup, contact, urls, cities, tweet, tweet_url]
+        return (username, resource, req, bloodgroup, contact, cities, tweet)
 
 
 def donationtweets(tweet):
@@ -97,7 +89,7 @@ def donationtweets(tweet):
     if not (any(restricted_word.upper() in tweet.upper() for restricted_word in restricted_words)):
         urls = findurls(tweet)
         if len(urls) > 0:
-            #     print("{},{}".format(tweet.split(',')[0],urls))
+            # 	print("{},{}".format(tweet.split(',')[0],urls))
             return (tweet.split(',')[0], urls)
 
 
@@ -107,27 +99,14 @@ def main():
         description='Code extracts information relevant to COVID 19 from tweets')
     parser.add_argument('--csv', help='csv', required=True, dest='csv')
     input_args = vars(parser.parse_args())
-
-    # Define a pandas dataframe to store the date:
-    processed_tweets = pd.DataFrame(
-        columns=['username', 'tweet_date', 'resource', 'req', 'bloodgroup', 'contact', 'urls', 'cities', 'tweet',
-                 'tweeturl'])
-    raw_tweets = pd.read_csv(input_args['csv'])
-    raw_tweets = raw_tweets.drop_duplicates('text')
-
-    for index, row in raw_tweets.iterrows():
-        # Testing resource request function
-        processed_tweets.loc[len(processed_tweets)] = resourcereq(row['username'], row['tweet_date'], row['text'],
-                                                                  row['id'])
-
-        # Put progress onto console
-        if (len(processed_tweets) % 100 == 0):
-            print(f"Processed {len(processed_tweets)} tweets thus far")
-
-    # Define working path and filename
-    path = os.getcwd()
-    filename = input_args['csv'].replace("raw_tweets", "parsed_deduped_data")
-    processed_tweets.to_csv(filename, index=False)
+    with open(input_args['csv']) as csvfile:
+        # for line in csvfile:
+        #     line = line.strip()
+        for x in range(10):
+            line = next(csvfile).strip()
+            # Testing resource request function
+            resourcereq(line)
+            line = csvfile.readline()
 
 
 if __name__ == '__main__':
