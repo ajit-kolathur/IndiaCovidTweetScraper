@@ -38,6 +38,8 @@ def findbloodgroup(str):
 
 def findContact(str):
 	contacts = re.findall("[91]*\s*[0-9]{2}\s*[0-9]{4}\s*[0-9]{4}",str)
+	if (len(contact)) == 0:
+		contact = re.findall("[91]*\s*[0-9]{5}\s*[0-9]{5}",str)
 	return list(map(lambda x: x.strip(), contacts))
 
 
