@@ -10,6 +10,8 @@ import string
 import preprocessor as p
 import os
 import time
+from datetime import datetime as dt
+from datetime import timedelta
 
 # Twitter credentials
 # Obtain them from your twitter developer accountconsumer_key = <your_consumer_key>
@@ -48,7 +50,7 @@ def scraptweets(search_words, date_since, numTweets, numRuns):
         # Collect tweets using the Cursor object
         # .Cursor() returns an object that you can iterate or loop over to access the data collected.
         # Each item in the iterator has various attributes that you can access to get information about each tweet
-        tweets = tweepy.Cursor(api.search, q=search_words, lang="en", since=date_since, tweet_mode='extended').items(numTweets)
+        tweets = tweepy.Cursor(api.search, q=search_words, lang="en", since=date_since, tweet_mode='extended', count = 100).items(numTweets)
         # Store these tweets into a python list
         tweet_list = [tweet for tweet in tweets]
         # Obtain the following info (methods to call them out):
@@ -101,10 +103,8 @@ def scraptweets(search_words, date_since, numTweets, numRuns):
             time.sleep(900)
 
     # Once all runs have completed, save them to a single csv file:
-    from datetime import datetime
-
     # Obtain timestamp in a readable format
-    to_csv_timestamp = datetime.today().strftime('%Y%m%d_%H%M%S')
+    to_csv_timestamp = dt.today().strftime('%Y%m%d_%H%M%S')
     # Define working path and filename
     path = os.getcwd()
     filename = path + '/data/' + to_csv_timestamp + '_covidindia_tweets.csv'
@@ -118,8 +118,8 @@ def scraptweets(search_words, date_since, numTweets, numRuns):
 # Execution params
 # Initialise these variables:
 search_words = 'verified Hyderabad (bed OR beds OR icu OR oxygen OR ventilator OR ventilators OR test OR tests OR testing OR plasma)'
-date_since = "2021-05-04"
-numTweets = 2500
-numRuns = 4
+date_since = (dt.today() - timedelta(days=2)).strftime('%Y-%m-%d')
+numTweets = 18000
+numRuns = 1
 # Call the function scraptweets
 scraptweets(search_words, date_since, numTweets, numRuns)
