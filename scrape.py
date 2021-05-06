@@ -34,13 +34,13 @@ auth = OAuthHandler(consumer_key, consumer_secret)
 auth.set_access_token(access_key, access_secret)
 api = tweepy.API(auth)
 
-def scraptweets(search_words, date_since, numTweets, numRuns):
+def scraptweets(city, search_words, date_since, numTweets, numRuns):
 
     # Define a for-loop to generate tweets at regular intervals
     # We cannot make large API call in one go. Hence, let's try T times
 
     # Define a pandas dataframe to store the date:
-    db_tweets = pd.DataFrame(columns = ['username', 'text', 'hashtags'])
+    db_tweets = pd.DataFrame(columns = ['username', 'tweet_date', 'text', 'hashtags'])
     
     program_start = time.time()
     for i in range(0, numRuns):
@@ -53,39 +53,19 @@ def scraptweets(search_words, date_since, numTweets, numRuns):
         tweets = tweepy.Cursor(api.search, q=search_words, lang="en", since=date_since, tweet_mode='extended', count = 100).items(numTweets)
         # Store these tweets into a python list
         tweet_list = [tweet for tweet in tweets]
-        # Obtain the following info (methods to call them out):
-        # user.screen_name - twitter handle
-        # user.description - description of account
-        # user.location - where is he tweeting from
-        # user.friends_count - no. of other users that user is following (following)
-        # user.followers_count - no. of other users who are following this user (followers)
-        # user.statuses_count - total tweets by user
-        # user.created_at - when the user account was created
-        # created_at - when the tweet was created
-        # retweet_count - no. of retweets
-        # (deprecated) user.favourites_count - probably total no. of tweets that is favourited by user
-        # retweeted_status.full_text - full text of the tweet
-        # tweet.entities['hashtags'] - hashtags in the tweet
         # Begin scraping the tweets individually:
         noTweets = 0
         for tweet in tweet_list:
             # Pull the values
             username = tweet.user.screen_name
-            # acctdesc = tweet.user.description
-            # location = tweet.user.location
-            # following = tweet.user.friends_count
-            # followers = tweet.user.followers_count
-            # totaltweets = tweet.user.statuses_count
-            # usercreatedts = tweet.user.created_at
-            # tweetcreatedts = tweet.created_at
-            # retweetcount = tweet.retweet_count
+            tweet_date = tweet.created_at
             hashtags = tweet.entities['hashtags']
             try:
                 text = tweet.retweeted_status.full_text
             except AttributeError:# Not a Retweet
                 text = tweet.full_text
             # Add the 11 variables to the empty list - ith_tweet:
-            ith_tweet = [username, text, hashtags]
+            ith_tweet = [username, tweet_date, text, hashtags]
             # Append to dataframe - db_tweets
             db_tweets.loc[len(db_tweets)] = ith_tweet
             # increase counter - noTweets
@@ -107,7 +87,7 @@ def scraptweets(search_words, date_since, numTweets, numRuns):
     to_csv_timestamp = dt.today().strftime('%Y%m%d_%H%M%S')
     # Define working path and filename
     path = os.getcwd()
-    filename = path + '/data/' + to_csv_timestamp + '_covidindia_tweets.csv'
+    filename = path + f"/data/{to_csv_timestamp}_{city}_raw_tweets.csv"
     # Store dataframe in csv with creation date timestamp
     db_tweets.to_csv(filename, index = False)
 
@@ -117,9 +97,13 @@ def scraptweets(search_words, date_since, numTweets, numRuns):
 
 # Execution params
 # Initialise these variables:
-search_words = 'verified Hyderabad (bed OR beds OR icu OR oxygen OR ventilator OR ventilators OR test OR tests OR testing OR plasma)'
-date_since = (dt.today() - timedelta(days=2)).strftime('%Y-%m-%d')
 numTweets = 18000
 numRuns = 1
-# Call the function scraptweets
-scraptweets(search_words, date_since, numTweets, numRuns)
+cities = ["Hyderabad", "Bangalore", "Mumbai", "Bombay", "Delhi", "Thane", "Nagpur", "Chennai", "Nashik"]
+perScrape = numTweets / len(cities)
+date_since = (dt.today() - timedelta(days=2)).strftime('%Y-%m-%d')
+
+for city in cities:
+    search_words = f"verified {city} (bed OR beds OR icu OR oxygen OR ventilator OR ventilators OR test OR tests OR testing OR plasma)"
+    # Call the function scraptweets
+    scraptweets(city, search_words, date_since, perScrape, numRuns)

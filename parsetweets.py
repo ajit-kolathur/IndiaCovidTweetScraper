@@ -51,7 +51,7 @@ def findCity(str):
 
 
 
-def resourcereq(user, tweet):
+def resourcereq(user, tweet_date, tweet):
 	# This proc parses tweets from request hashtags and returns username,resource,contact,bloodtype,city,fulltweet
 	# Looking for plasma and oxygen
 	# if Plasma, additionally look for blood type 
@@ -76,7 +76,7 @@ def resourcereq(user, tweet):
 		contact = findContact(tweet)
 		cities = findCity(tweet)
 		# print("username = {}, resource = {}, Purpose = {},  bloodgroup = {}, contact = {}, cities = {} ".format(username,resource,req,bloodgroup,contact,cities,tweet))
-		return [username,resource,req,bloodgroup,contact,cities,tweet]
+		return [username,tweet_date,resource,req,bloodgroup,contact,cities,tweet]
 		
 		
 
@@ -100,23 +100,21 @@ def main():
 	input_args = vars(parser.parse_args())
 
 	# Define a pandas dataframe to store the date:
-	processed_tweets = pd.DataFrame(columns = ['username','resource','req','bloodgroup','contact','cities','tweet'])
+	processed_tweets = pd.DataFrame(columns = ['username', 'tweet_date', 'resource','req','bloodgroup','contact','cities','tweet'])
 	raw_tweets = pd.read_csv(input_args['csv'])
 	raw_tweets = raw_tweets.drop_duplicates('text')
 
 	for index, row in raw_tweets.iterrows():
 		# Testing resource request function
-		processed_tweets.loc[len(processed_tweets)] = resourcereq(row['username'], row['text'])
+		processed_tweets.loc[len(processed_tweets)] = resourcereq(row['username'], row['tweet_date'], row['text'])
 
 		# Put progress onto console
 		if (len(processed_tweets) % 100 == 0):
 			print(f"Processed {len(processed_tweets)} tweets thus far")
 	
-	# Obtain timestamp in a readable format
-	to_csv_timestamp = dt.today().strftime('%Y%m%d_%H%M%S')
     # Define working path and filename
 	path = os.getcwd()
-	filename = path + '/data/' + to_csv_timestamp + '_parsed_deduped_data.csv'
+	filename = input_args['csv'].replace("raw_tweets", "parsed_deduped_data")
 	processed_tweets.to_csv(filename, index = False)
 
 if __name__ == '__main__':
