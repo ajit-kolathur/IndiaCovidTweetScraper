@@ -117,8 +117,9 @@ def main():
 
     for index, row in raw_tweets.iterrows():
         # Testing resource request function
-        processed_tweets.loc[len(processed_tweets)] = resourcereq(row['username'], row['tweet_date'], row['text'],
-                                                                  row['id'])
+        processed_tweet = resourcereq(row['username'], row['tweet_date'], row['text'], row['id'])
+        if processed_tweet: # Empty check. TODO: Why are these empty in the first place.
+            processed_tweets.loc[len(processed_tweets)] = processed_tweet
 
         # Put progress onto console
         if (len(processed_tweets) % 100 == 0):
