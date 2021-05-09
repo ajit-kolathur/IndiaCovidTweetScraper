@@ -1,18 +1,18 @@
-from tweepy import OAuthHandler
-from tweepy.streaming import StreamListener
 import tweepy
 import json
 import pandas as pd
 import csv
 import re
-from textblob import TextBlob
 import string
 import preprocessor as p
 import os
 import time
+import parsetweets
+from tweepy import OAuthHandler
+from tweepy.streaming import StreamListener
+from textblob import TextBlob
 from datetime import datetime as dt
 from datetime import timedelta
-import parsetweets
 
 # Twitter credentials
 # Obtain them from your twitter developer accountconsumer_key = <your_consumer_key>
@@ -51,8 +51,7 @@ def scrapetweets(city, search_words, date_since, numTweets, numRuns, cities, fil
         # Collect tweets using the Cursor object
         # .Cursor() returns an object that you can iterate or loop over to access the data collected.
         # Each item in the iterator has various attributes that you can access to get information about each tweet
-        tweets = tweepy.Cursor(api.search, q=search_words, lang="en", since=date_since, tweet_mode='extended',
-                               count=100).items(numTweets)
+        tweets = tweepy.Cursor(api.search, q=search_words, lang="en", since=date_since, tweet_mode='extended', count=100).items(numTweets)
         # Store these tweets into a python list
         tweet_list = [tweet for tweet in tweets]
         # Begin scraping the tweets individually:
@@ -107,8 +106,7 @@ date_since = (dt.today() - timedelta(days=2)).strftime('%Y-%m-%d')
 # Obtain timestamp in a readable format
 to_csv_timestamp = dt.today().strftime('%Y%m%d_%H%M%S')
 # Define working path and filename
-path = os.getcwd()
-filename = path + f"/data/{to_csv_timestamp}_India_raw_tweets.csv"
+filename = f"{os.getcwd()}/data/{to_csv_timestamp}_India_raw_tweets.csv"
 
 for city in cities:
     search_words = f"verified {city} (bed OR beds OR icu OR oxygen OR ventilator OR ventilators OR test OR tests OR testing OR plasma)"
@@ -117,4 +115,4 @@ for city in cities:
 
 print('Scraping has completed for all cities!')
 
-os.system("parsetweets.py --csv {}".format(filename))
+os.system("python parsetweets.py --csv {}".format(filename))

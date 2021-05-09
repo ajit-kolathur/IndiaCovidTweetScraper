@@ -129,7 +129,9 @@ def main():
     path = os.getcwd()
     filename = input_args['csv'].replace("raw_tweets", "parsed_deduped_data")
     processed_tweets.to_csv(filename, index=False)
-
+    
+    with pd.ExcelWriter(filename.replace('csv', 'xlsx')) as writer:
+        processed_tweets.to_excel(writer, sheet_name='India')
 
 if __name__ == '__main__':
     main()
