@@ -6,22 +6,11 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
-import sys
-import getopt
 import re
-import sys
 from collections import defaultdict
 import pandas as pd
-import sys
 import argparse
-from argparse import RawTextHelpFormatter
 import os
-from os.path import abspath
-from os import listdir
-from os.path import isfile, join
-from numpy import arange
-from datetime import datetime as dt
-
 
 def findurls(str):
     urls = re.findall('http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\(\), ]|(?:%[0-9a-fA-F][0-9a-fA-F]))+', str)
@@ -54,8 +43,10 @@ def findCity(str):
     return tweetcities
 
 
+# TODO : Take top 5 from each state: https://www.oneindia.com/coronavirus-affected-cities-districts-in-india.html
 def get_all_cities():
-    return ["Hyderabad", "Bangalore", "Mumbai", "Bombay", "Delhi", "Thane", "Nagpur", "Chennai", "Nashik", "Waranagal"]
+    # https://www.businessinsider.in/india/news/checkout-the-10-most-affected-cities-in-india-with-the-highest-number-of-coronavirus-cases/slidelist/76343170.cms#slideid=76343212
+    return ["Delhi", "Pune", "Mumbai", "Bombay", "Bangalore", "Bengaluru", "Thane", "Nagpur", "Chennai", "Nashik", "Hyderabad", "Kamprup", "Waranagal"]
 
 
 def resourcereq(user, tweet_date, tweet, id):

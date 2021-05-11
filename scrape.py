@@ -1,16 +1,9 @@
 import tweepy
-import json
 import pandas as pd
-import csv
-import re
-import string
-import preprocessor as p
 import os
 import time
 import parsetweets
 from tweepy import OAuthHandler
-from tweepy.streaming import StreamListener
-from textblob import TextBlob
 from datetime import datetime as dt
 from datetime import timedelta
 
@@ -33,7 +26,7 @@ access_secret = creds["AccessTokenSecret"]
 # Pass your twitter credentials to tweepy via its OAuthHandler
 auth = OAuthHandler(consumer_key, consumer_secret)
 auth.set_access_token(access_key, access_secret)
-api = tweepy.API(auth)
+api = tweepy.API(auth, wait_on_rate_limit=True, wait_on_rate_limit_notify=True)
 
 
 def scrapetweets(city, search_words, date_since, numTweets, numRuns, cities, filename):
