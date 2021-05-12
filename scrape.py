@@ -34,7 +34,7 @@ def scrapetweets(city, search_words, date_since, numTweets, numRuns, cities, fil
     # We cannot make large API call in one go. Hence, let's try T times
 
     # Define a pandas dataframe to store the date:
-    db_tweets = pd.DataFrame(columns=['username', 'tweet_date', 'text', 'hashtags', 'id'])
+    db_tweets = pd.DataFrame(columns=['username','is_verified', 'tweet_date', 'text', 'hashtags', 'id'])
 
     program_start = time.time()
     for i in range(0, numRuns):
@@ -52,6 +52,7 @@ def scrapetweets(city, search_words, date_since, numTweets, numRuns, cities, fil
         for tweet in tweet_list:
             # Pull the values
             username = tweet.user.screen_name
+            is_verified = tweet.user.verified
             tweet_date = tweet.created_at
             hashtags = tweet.entities['hashtags']
             id = tweet.id
@@ -60,7 +61,7 @@ def scrapetweets(city, search_words, date_since, numTweets, numRuns, cities, fil
             except AttributeError:  # Not a Retweet
                 text = tweet.full_text
             # Add the 11 variables to the empty list - ith_tweet:
-            ith_tweet = [username, tweet_date, text, hashtags, id]
+            ith_tweet = [username,is_verified, tweet_date, text, hashtags, id]
             # Append to dataframe - db_tweets
             db_tweets.loc[len(db_tweets)] = ith_tweet
             # increase counter - noTweets
