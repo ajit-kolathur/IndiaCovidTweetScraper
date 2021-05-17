@@ -62,7 +62,9 @@ def resourcereq(user, tweet_date, tweet, id):
         else:
             req = "UNKNOWN"
         username = user
-        if "OXYGEN" in tweet.upper():
+	if ("OXYGEN" in tweet.upper()) and ("BED" in tweet.upper()):
+		resource = "oxygen bed" 
+        elif "OXYGEN" in tweet.upper():
             resource = "oxygen"
         elif "PLASMA" in tweet.upper():
             resource = "plasma"
